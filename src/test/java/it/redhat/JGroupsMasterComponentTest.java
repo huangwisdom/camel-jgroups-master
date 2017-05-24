@@ -24,6 +24,7 @@ public class JGroupsMasterComponentTest extends CamelTestSupport {
         template.sendBody("foo");
         mock.expectedMinimumMessageCount(1);
         assertMockEndpointsSatisfied();
+        template.getCamelContext().stop();
     }
 
     @Override
@@ -45,5 +46,6 @@ public class JGroupsMasterComponentTest extends CamelTestSupport {
         SftpEndpoint sftp = (SftpEndpoint) master.getEndpoint();
 
         assertEquals("_BEFORE_AMPERSAND_&_AFTER_AMPERSAND_", sftp.getConfiguration().getPassword());
+        ctx.stop();
     }
 }
