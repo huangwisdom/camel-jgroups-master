@@ -1,8 +1,11 @@
 package it.redhat;
 
 import org.apache.camel.Consumer;
+import org.apache.camel.Endpoint;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
+import org.apache.camel.api.management.ManagedAttribute;
+import org.apache.camel.api.management.ManagedResource;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriEndpoint;
@@ -10,28 +13,54 @@ import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriPath;
 
 /**
- * Represents a JGroupsMaster endpoint.
+ * Represents a Master endpoint which only becomes active when it obtains the groupName lock through JGroups
  */
-@UriEndpoint(scheme = "camel-jgroups-master", title = "JGroupsMaster", syntax="camel-jgroups-master:name", consumerClass = JGroupsMasterConsumer.class, label = "JGroupsMaster")
+@ManagedResource(description = "Managed Jgroups Master Endpoint")
+@UriEndpoint(scheme = "jgroups-master", title = "JGroups Master", syntax="jgroups-master:groupName:consumerEndpointUri",
+        consumerClass = JGroupsMasterConsumer.class,consumerOnly = true, lenientProperties = true, label = "clustering")
 public class JGroupsMasterEndpoint extends DefaultEndpoint {
-    @UriPath @Metadata(required = "true")
+
+    private final JGroupsMasterComponent component;
+    private final String consumerEndpointUri;
+
+    @UriPath (description = "The lock group to use")
+    @Metadata(required = "false")
     @UriParam(defaultValue = "lock")
+    private String groupName;
 
-    private String name;
+    @UriPath(description = "The consumer endpoint to use in master/slave mode")
+    @Metadata(required = "true")
+    private final Endpoint consumerEndpoint;
 
-    public JGroupsMasterEndpoint() {
-    }
-
-    public JGroupsMasterEndpoint(String uri, JGroupsMasterComponent component) {
+    public JGroupsMasterEndpoint(String uri, JGroupsMasterComponent component, String groupName, String consumerEndpointUri) {
         super(uri, component);
+        this.component = component;
+        this.groupName = groupName;
+        this.consumerEndpointUri = consumerEndpointUri;
+        this.consumerEndpoint = getCamelContext().getEndpoint(consumerEndpointUri);
     }
 
-    public JGroupsMasterEndpoint(String endpointUri) {
-        super(endpointUri);
+    public Endpoint getEndpoint() {
+        return consumerEndpoint;
+    }
+
+    public Endpoint getConsumerEndpoint() {
+        return getEndpoint();
+    }
+
+    @ManagedAttribute(description = "The consumer endpoint url to use in master/slave mode", mask = true)
+    public String getConsumerEndpointUri() {
+        return consumerEndpointUri;
+    }
+
+    @ManagedAttribute(description = "The name of the cluster group to use")
+    public String getGroupName() {
+        return groupName;
     }
 
     public Producer createProducer() throws Exception {
-        return new JGroupsMasterProducer(this);
+        throw new UnsupportedOperationException(
+                "You cannot send messages to this endpoint:" + getEndpointUri());
     }
 
     public Consumer createConsumer(Processor processor) throws Exception {
@@ -42,15 +71,9 @@ public class JGroupsMasterEndpoint extends DefaultEndpoint {
         return true;
     }
 
-    /**
-     * Some description of this option, and what it does
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
+    @Override
+    public boolean isLenientProperties() {
+        return true;
     }
 
 }
