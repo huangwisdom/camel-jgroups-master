@@ -32,7 +32,7 @@ public class JGroupsMasterComponentTest extends CamelTestSupport {
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
-                from("camel-jgroups-master:lock://foo")
+                from("jgroups-master:lock:direct:start")
                   .to("mock:result");
             }
         };

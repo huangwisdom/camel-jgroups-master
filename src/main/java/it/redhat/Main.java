@@ -22,7 +22,7 @@ public class Main extends ReceiverAdapter {
     public void start() throws Exception {
         channel = new JChannel("locking.xml").setReceiver(this);
         LockService lockService = new LockService(channel);
-        channel.connect("camel-jgroups-master");
+        channel.connect("jgroups-master");
 
         Lock lock = lockService.getLock("mylock"); // gets a cluster-wide lock
 
