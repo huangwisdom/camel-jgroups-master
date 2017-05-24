@@ -37,10 +37,25 @@ public class JGroupsMasterConsumer extends DefaultConsumer {
         super.doStart();
         LOG.info("Attempting to become master for endpoint: " + endpoint.getEndpoint() + " in " + endpoint.getCamelContext() + " with groupName: " + endpoint.getGroupName());
         acquireLock();
-        LOG.info("Became master for endpoint: " + endpoint.getEndpoint());
+        if (delegate == null) {
+            try {
+                // ensure endpoint is also started
+                LOG.info("Elected as master. Starting consumer: {}", endpoint.getConsumerEndpoint());
+                ServiceHelper.startService(endpoint.getConsumerEndpoint());
 
-        delegateService = (SuspendableService) endpoint.getEndpoint();
-        ServiceHelper.startService(delegateService);
+                delegate = endpoint.getConsumerEndpoint().createConsumer(processor);
+                delegateService = null;
+                if (delegate instanceof SuspendableService) {
+                    delegateService = (SuspendableService) delegate;
+                }
+
+                ServiceHelper.startService(delegate);
+            } catch (Exception e) {
+                LOG.error("Failed to start master consumer for: " + endpoint, e);
+            }
+
+            LOG.info("Elected as master. Consumer started: {}", endpoint.getConsumerEndpoint());
+        }
     }
 
     private void acquireLock() {
