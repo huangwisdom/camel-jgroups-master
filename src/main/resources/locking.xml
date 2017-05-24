@@ -1,7 +1,5 @@
 <!--
-  Default stack using IP multicasting. It is similar to the "udp"
-  stack in stacks.xml, but doesn't use streaming state transfer and flushing
-  author: Bela Ban
+  Default stack using IP multicasting, with CENTRAL_LOCK
 -->
 
 <config xmlns="urn:org:jgroups"
