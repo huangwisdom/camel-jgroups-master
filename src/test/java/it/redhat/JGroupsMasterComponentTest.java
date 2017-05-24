@@ -12,19 +12,17 @@ import java.util.List;
 
 public class JGroupsMasterComponentTest extends CamelTestSupport {
 
-    protected CamelContext camelContext;
-
-    @EndpointInject(uri = "mock:results")
+    @EndpointInject(uri = "mock:result")
     protected MockEndpoint resultEndpoint;
 
-    @Produce(uri = "seda:bar")
+    @Produce(uri = "direct:start")
     protected ProducerTemplate template;
 
     @Test
     public void testJGroupsMaster() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
-        mock.expectedMinimumMessageCount(1);       
-        
+        template.sendBody("foo");
+        mock.expectedMinimumMessageCount(1);
         assertMockEndpointsSatisfied();
     }
 
@@ -36,26 +34,6 @@ public class JGroupsMasterComponentTest extends CamelTestSupport {
                   .to("mock:result");
             }
         };
-    }
-
-    @Test
-    public void testEndpoint() throws Exception {
-        // check the endpoint configuration
-        List<Route> registeredRoutes = camelContext.getRoutes();
-        assertEquals("number of routes", 1, registeredRoutes.size());
-        JGroupsMasterEndpoint endpoint = (JGroupsMasterEndpoint) registeredRoutes.get(0).getEndpoint();
-        assertEquals("wrong endpoint uri", "seda:bar", endpoint.getConsumerEndpointUri());
-
-        String expectedBody = "<matched/>";
-
-        resultEndpoint.expectedBodiesReceived(expectedBody);
-
-        // lets wait for the entry to be registered...
-        Thread.sleep(5000);
-
-        template.sendBodyAndHeader(expectedBody, "foo", "bar");
-
-        MockEndpoint.assertIsSatisfied(camelContext);
     }
 
     @Test

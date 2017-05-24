@@ -35,8 +35,16 @@ public class JGroupsMasterConsumer extends DefaultConsumer {
     @Override
     protected void doStart() throws Exception {
         super.doStart();
-        LOG.info("Attempting to become master for endpoint: " + endpoint + " in " + endpoint.getCamelContext() + " with singletonID: " + endpoint.getGroupName());
+        LOG.info("Attempting to become master for endpoint: " + endpoint.getEndpoint() + " in " + endpoint.getCamelContext() + " with groupName: " + endpoint.getGroupName());
+        acquireLock();
+        LOG.info("Became master for endpoint: " + endpoint.getEndpoint());
+
+        delegateService = (SuspendableService) endpoint.getEndpoint();
         ServiceHelper.startService(delegateService);
+    }
+
+    private void acquireLock() {
+        //TODO
     }
 
     @Override
