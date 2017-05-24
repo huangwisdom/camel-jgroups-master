@@ -19,7 +19,7 @@ public class JGroupsMasterComponentTest extends CamelTestSupport {
     protected ProducerTemplate template;
 
     @Test
-    public void testJGroupsMaster() throws Exception {
+    public void testChildIsWorking() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         template.sendBody("foo");
         mock.expectedMinimumMessageCount(1);

@@ -25,7 +25,6 @@ public class JGroupsMasterConsumer extends DefaultConsumer {
     private Consumer delegate;
     private SuspendableService delegateService;
 
-
     public JGroupsMasterConsumer(JGroupsMasterEndpoint endpoint, Processor processor) {
         super(endpoint, processor);
         this.endpoint = endpoint;
